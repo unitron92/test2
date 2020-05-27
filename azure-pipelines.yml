@@ -13,13 +13,17 @@ steps:
     command: 'get'
     arguments: '-d'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
-- task: Go@0
+- script: |
+ npm install
+ displayName: 'Install script'
+ 
+- task: DownloadSecureFile@1
+  name: authkey
+  displayName: 'Account Key download'
   inputs:
-    command: 'build'
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
-- task: CopyFiles@2
-  inputs:
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-- task: PublishBuildArtifacts@1
-  inputs:
-     artifactName: drop
+   securefile: 'tonal-limiter-276308-3e682d603f08.json'
+   
+- script: |
+  wget google-cloud-sdk-293.0.0-windows-x86_64.zip
+  tar zxvf google-cloud-sdk.tar.gz && ./google-cloud-sdk/install.sh --quiet --usage-reporting=false --path-update=tru
+  gcloud beta functions deploy function-1 --source=./https://us-central1-azure-pipeline.cloudfunctions.net/function-1 --trigger-http
